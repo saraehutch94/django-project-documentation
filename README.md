@@ -194,6 +194,73 @@ You should see a success screen pop-up with a spaceship.
 \* `return` --> response of request   
 \* `request` --> similar to requires in Express, but just putting request instead    
 \* Try refreshing the page; you should see "hello world" in browser window   
+\* Write similar view functions for your about page and any other pages (define path as well in `urls.py` in `main_app`)
 
+<br>
 
-### **Write similar view functions for your about page and any other pages (define path as well in `urls.py` in `main_app`)**
+****
+
+### **Django Templates**
+
+**DTL/DJango Template Language** - domain-specific language to framework; renders dynamic HTML
+
+1.) Add templates folder to `main_app`:   
+`mkdir main_app/templates`    
+
+2.) Add `about.html` to `templates` folder:   
+`touch main_app/templates/about.html`
+
+3.) Add HTML boilerplate:   
+> ! + ENTER or TAB
+
+- Change title of HTML document
+- Add content to `<body>` tags
+
+4.) Serve HTML templates:   
+- Head to `views.py`/controllers file in `main_app`
+- Change **about** views function
+
+> def about(request):   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return render(request, 'about.html')
+
+\* If you head to localhost:8000/about/, you should see HTML rendered to DOM instead of string HttpResponse we had earlier   
+\* Do the same for the home page (change **home** views function to render `home.html` template; create `home.html` template with boilerplate content)
+
+<br>
+
+#### **Template Inheritance**
+
+\* Can be compared to EJS Partials
+
+1.) Create `base.html` inside of `templates` folder:   
+`touch main_app/templates/base.html`
+
+2.) Sharing `base.html`: extend `base.html` in other HTML templates   
+- Any place we want to override content: use content blocks
+- `base.html` --> blueprint for all templates; change blueprint for specific HTML templates using content blocks
+
+`{% %}` --> Django template tags   
+`{% block content %} {% endblock %}` --> placeholder/content block: extend `base.html` into sub-template (ex: `about.html`)   
+
+\* We can override what is inside this block by defining it in sub-templates and add the content to put into place   
+\* You will see this come into practice with future code blocks
+
+3.) Create boilerplate inside of `base.html` and within the `<body>` tags, add `<main>` tags, and add within those tags:    
+
+> {% block content %}   
+>   
+> {% endblock %}
+
+4.) Inside of `about.html`, take out entire boilerplate and add this to extend `base.html` and replace block content with what you want to be shown in about page specifically:   
+
+> {% extends 'base.html' %}   
+>   
+> {% block content %}   
+> `<h1> About The Car Collector </h1>`   
+> `</hr>`   
+> `<p>Hire The Car Collector</p>`   
+> {% endblock %}
+
+\* When `base.html` is extended in sub-templates, it is basically carrying over the entire HTML boilerplate over to the sub-templates. Whatever is defined within a **content block** in a sub-template, will override the **content block** in the exended `base.html` template --> so all this content will be within `<main>` tags since the **content blocks** in `base.html` were defined within these tags.   
+\* Extend `base.html` into your other sub-templates
+
