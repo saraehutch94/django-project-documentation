@@ -150,12 +150,12 @@ You should see a success screen pop-up with a spaceship.
 
 - Head to **urls.py** in core project (**car_collector**); under `urlpatterns []` list, add:   
 
-> from django.urls import path, include   
+> `from django.urls import path, include`   
 >    
-> urlpatterns = [   
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...   
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; path('', include('main_app.urls')),   
-> ]
+> `urlpatterns = [`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `...`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `path('', include('main_app.urls')),`   
+> `]`
 
 \* `''` above: root url path (empty string)   
 \* for the root path, include Django app (**main_app**) and **urls.py** / "urls config" file
@@ -164,11 +164,11 @@ You should see a success screen pop-up with a spaceship.
 
 ### **Define URL patterns in *urls.py* inside *main_app*:**
 
-> from django.urls import path   
+> `from django.urls import path`   
 > 
-> urlpatterns = [   
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; path('', views.home, name='home'),   
-> ]
+> `urlpatterns = [`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `path('', views.home, name='home'),`   
+> `]`
 
 \* All `urls.py` modules need this variable inside of them --> Django will scan file and look for variable and any url paths defined in that list variable   
 \* *path:* method used to create url paths; generates and allows us to define url paths   
@@ -186,10 +186,10 @@ You should see a success screen pop-up with a spaceship.
 `from . import views`   
 
 2.) Add home views function:
-> from django.http import HttpResponse    
+> `from django.http import HttpResponse`    
 >
-> def home(request):   
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return HttpResponse("hello")    
+> `def home(request):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`return HttpResponse("hello")`    
 
 \* `return` --> response of request   
 \* `request` --> similar to requires in Express, but just putting request instead    
@@ -220,8 +220,8 @@ You should see a success screen pop-up with a spaceship.
 - Head to **views.py**/controllers file in **main_app**
 - Change **about** views function
 
-> def about(request):   
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return render(request, 'about.html')
+> `def about(request):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `return render(request, 'about.html')`
 
 \* If you head to **localhost:8000/about/**, you should see HTML rendered to DOM instead of string HttpResponse we had earlier   
 \* Do the same for the home page (change **home** views function to render **home.html** template; create **home.html** template with boilerplate content)
@@ -313,4 +313,54 @@ You should see a success screen pop-up with a spaceship.
 
 > `def cars_index(request):`   
 > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `return render(request, 'cars/index.html', { 'cars': cars })`
+
+\* `cars/index.html` --> folder with template where we are setting data to   
+\* `{'cars': cars}` --> context dictionary (similar to context object we utilized in Express/node.js); we use this to pass data from our view function to the rendered template; currently will have green squiggly line below it because **cars** is not defined yet
+
+4.) Create fake database (will change later when we use PostgreSQL for database --> this step is for testing the render of data to a template):
+
+> `class Car():`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`def __init__(self, make, model, color, description):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`self.make = make`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`self.model = model`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`self.color = color`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`self.description = description`
+>    
+
+> `cars = [`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`car('Tesla', 'Model X', 'blue', 'my dream car I will name Blueberry'),`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`car('Kia', 'EV6', 'silver', 'saw during the superbowl commercial and... wow'),`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`car('Kia', 'Stinger', 'Ascot Green', 'fast car vrooom')`   
+> `]`
+
+5.) Create template rendering all cars:   
+
+`mkdir main_app/templates/cars`   
+`touch main_app/templates/cars/index.html`
+
+6.) Head to **cars/index.html**, extend **base.html** and add content for rendering all cars from **cars** list:   
+
+> `{% extends 'base.html' %}`   
+>    
+> `{% block content %}`   
+> `<h1>Car List</h1>`   
+>    
+> `{% for car in cars %}`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span>{{ car.make }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span>{{ car.model }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span>Color: {{ car.color }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span>Description: {{ car.description }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`</div>`   
+> `{% endfor %}`   
+> `{% endblock %}`
+
+\* `{% endfor %}` --> ending for loop block tag (if it was an if statement, the ending block tag would be: `{% endif %}`)
+
+****
+
+### **Django Models**
+
+\* *model:* extension of Django's built-in **Model class**   
+\* Attributes in **Model class** are created with **Field classes**; each attribute will become a *column in the table* for that specific model's table.
 
