@@ -34,7 +34,7 @@ This will create a directory with the title of "car-collector"
 
 <br>
 
-### **Terminal: Head to `django_env`:**
+### **Terminal: Head to *django_env* directory:**
 
 Running the first command below anywhere in your terminal will take you to your root directory
 <br>
@@ -50,7 +50,7 @@ Running the first command below anywhere in your terminal will take you to your 
 
 <br>
 
-### **Terminal: Head to your car_collector project:**
+### **Terminal: Head to your *car_collector* project:**
 
 `cd ~/Desktop/`   
 `cd SEIR/`   
@@ -94,9 +94,9 @@ Interpreter should look something like this: <br>
 
  <br>
 
-### **Install main_app to car_collector:**
+### **Install main_app to *car_collector*:**
 
-1.) Head to `settings.py` under `car_collector`    
+1.) Head to **settings.py** under **car_collector**    
 2.) Find `INSTALLED_APPS` list and add `main_app` to it
 
 <br>
@@ -109,13 +109,13 @@ Interpreter should look something like this: <br>
 
 <br>
 
-### **Head to `localhost:8000` in your browser**
+### **Head to *localhost:8000* in your browser**
 
 You should see a success screen pop-up with a spaceship.
 
 <br>
 
-### **Head to `settings.py` under `car_collector`:**
+### **Head to *settings.py* under *car_collector*:**
 
 1.) Find `DATABASES {}` dictionary   
 2.) Change:   
@@ -139,16 +139,16 @@ You should see a success screen pop-up with a spaceship.
 
 ### **Connect core of project to Django app**
 
-\* Core project = `car_collector` --> project's entry point (similar to server.js in Express but with multiple files)   
-\* Django app = `main_app` --> controllers, models, anything specific to routing goes here
+\* Core project = **car_collector** --> project's entry point (similar to server.js in Express but with multiple files)   
+\* Django app = **main_app**--> controllers, models, anything specific to routing goes here
 
-1.) In VSCode terminal, add file to `main_app` called `urls.py`:    
+1.) In VSCode terminal, add file to **main_app** called **urls.py**:    
 `touch main_app/urls.py`   
-2.) Need to connect `urls.py` "urls config" in `main_app` to `urls.py` "urls config" in `car_collector`:
+2.) Need to connect **urls.py** "urls config" in **main_app** to **urls.py** "urls config" in **car_collector**:
 
 ![Components of Django Project](https://i.imgur.com/gscrXbn.png)
 
-- Head to `urls.py` in core project (`car_collector`); under `urlpatterns []` list, add:   
+- Head to **urls.py** in core project (**car_collector**); under `urlpatterns []` list, add:   
 
 > from django.urls import path, include   
 >    
@@ -158,11 +158,11 @@ You should see a success screen pop-up with a spaceship.
 > ]
 
 \* `''` above: root url path (empty string)   
-\* for the root path, include Django app (`main_app`) and `urls.py` / "urls config" file
+\* for the root path, include Django app (**main_app**) and **urls.py** / "urls config" file
 
 <br>
 
-### **Define URL patterns in `urls.py` inside `main_app`:**
+### **Define URL patterns in *urls.py* inside *main_app*:**
 
 > from django.urls import path   
 > 
@@ -173,12 +173,12 @@ You should see a success screen pop-up with a spaceship.
 \* All `urls.py` modules need this variable inside of them --> Django will scan file and look for variable and any url paths defined in that list variable   
 \* *path:* method used to create url paths; generates and allows us to define url paths   
 \* `''` above: Home page/url path   
-\* `views.home` --> functionality we want to invoke in result of path being requested (home view function in `views.py`)   
+\* `views.home` --> functionality we want to invoke in result of path being requested (home view function in **views.py**)   
 \* `name='home'` --> alias for url pattern; instead of referencing path itself, we can reference name attribute of path whenever we are trying to create dynamic paths in our templates (will be shown later in documentation)
 
 <br>
 
-### **Head to `views.py` in `main_app` (controllers file):**
+### **Head to *views.py* in *main_app* (controllers file):**
 
 \* *view functions* are invoked in response to a request being made to server (heading to a specific path)
 
@@ -194,7 +194,7 @@ You should see a success screen pop-up with a spaceship.
 \* `return` --> response of request   
 \* `request` --> similar to requires in Express, but just putting request instead    
 \* Try refreshing the page; you should see "hello world" in browser window   
-\* Write similar view functions for your about page and any other pages (define path as well in `urls.py` in `main_app`)
+\* Write similar view functions for your about page and any other pages (define path as well in **urls.py** in **main_app**)
 
 <br>
 
@@ -204,10 +204,10 @@ You should see a success screen pop-up with a spaceship.
 
 **DTL/DJango Template Language** - domain-specific language to framework; renders dynamic HTML
 
-1.) Add templates folder to `main_app`:   
+1.) Add templates folder to **main_app**:   
 `mkdir main_app/templates`    
 
-2.) Add `about.html` to `templates` folder:   
+2.) Add **about.html** to **templates** folder:   
 `touch main_app/templates/about.html`
 
 3.) Add HTML boilerplate:   
@@ -217,50 +217,100 @@ You should see a success screen pop-up with a spaceship.
 - Add content to `<body>` tags
 
 4.) Serve HTML templates:   
-- Head to `views.py`/controllers file in `main_app`
+- Head to **views.py**/controllers file in **main_app**
 - Change **about** views function
 
 > def about(request):   
 > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return render(request, 'about.html')
 
-\* If you head to localhost:8000/about/, you should see HTML rendered to DOM instead of string HttpResponse we had earlier   
-\* Do the same for the home page (change **home** views function to render `home.html` template; create `home.html` template with boilerplate content)
+\* If you head to **localhost:8000/about/**, you should see HTML rendered to DOM instead of string HttpResponse we had earlier   
+\* Do the same for the home page (change **home** views function to render **home.html** template; create **home.html** template with boilerplate content)
 
 <br>
 
-#### **Template Inheritance**
+### **Template Inheritance**
 
 \* Can be compared to EJS Partials
 
-1.) Create `base.html` inside of `templates` folder:   
+1.) Create **base.html** inside of **templates** folder:   
 `touch main_app/templates/base.html`
 
-2.) Sharing `base.html`: extend `base.html` in other HTML templates   
+2.) Sharing **base.html**: extend **base.html** in other HTML templates   
 - Any place we want to override content: use content blocks
-- `base.html` --> blueprint for all templates; change blueprint for specific HTML templates using content blocks
+- **base.html** --> blueprint for all templates; change blueprint for specific HTML templates using content blocks
 
 `{% %}` --> Django template tags   
-`{% block content %} {% endblock %}` --> placeholder/content block: extend `base.html` into sub-template (ex: `about.html`)   
+`{% block content %} {% endblock %}` --> placeholder/content block: extend **base.html** into sub-template (ex: **about.html**)   
 
 \* We can override what is inside this block by defining it in sub-templates and add the content to put into place   
 \* You will see this come into practice with future code blocks
 
-3.) Create boilerplate inside of `base.html` and within the `<body>` tags, add `<main>` tags, and add within those tags:    
+3.) Create boilerplate inside of **base.html** and within the `<body>` tags, add `<main>` tags, and add within those tags:    
 
-> {% block content %}   
+> `{% block content %} `  
 >   
-> {% endblock %}
+> `{% endblock %}`
 
-4.) Inside of `about.html`, take out entire boilerplate and add this to extend `base.html` and replace block content with what you want to be shown in about page specifically:   
+4.) Inside of **about.html**, take out entire boilerplate and add this to extend **base.html** and replace block content with what you want to be shown in about page specifically:   
 
-> {% extends 'base.html' %}   
+> `{% extends 'base.html' %}`   
 >   
-> {% block content %}   
+> `{% block content %}`   
 > `<h1> About The Car Collector </h1>`   
 > `</hr>`   
 > `<p>Hire The Car Collector</p>`   
-> {% endblock %}
+> `{% endblock %}`
 
-\* When `base.html` is extended in sub-templates, it is basically carrying over the entire HTML boilerplate over to the sub-templates. Whatever is defined within a **content block** in a sub-template, will override the **content block** in the exended `base.html` template --> so all this content will be within `<main>` tags since the **content blocks** in `base.html` were defined within these tags.   
-\* Extend `base.html` into your other sub-templates
+\* When **base.html** is extended in sub-templates, it is basically carrying over the entire HTML boilerplate over to the sub-templates. Whatever is defined within a **content block** in a sub-template, will override the **content block** in the exended **base.html template** --> so all this content will be within `<main>` tags since the **content blocks** in **base.html** were defined within these tags.   
+\* Extend **base.html** into your other sub-templates
+
+****
+
+### **Static folder: CSS + JS files**
+
+\* Similar to Express' public folder
+
+1.) Add **static folder** to **main_app**:    
+`mkdir main_app/static`
+
+2.) Add CSS folder to **static folder**, then add **style.css** file to CSS folder:    
+`mkdir main_app/static/css`    
+`touch main_app/static/css/style.css`
+
+3.) Inside **base.html**, add to top of boilerplate (even above `<!DOCTYPE html>`):   
+`{% load static %}`
+
+\* This tells Django view engine that we need to make the static assets available in our templates
+
+4.) Link to stylesheet in **base.html** boilerplate:   
+`<link rel="stylesheet" href="{% static 'css/style.css' %}/>"`
+
+\* May need to reset server to see any CSS changes   
+\* `{% static 'css/style.css' %}` --> static template tag with expected dynamic path to static assets
+
+<br>
+
+### **Rendering data to Templates**
+
+1.) Add nav bar to **base.html** (inside additional `<header>` tags):   
+
+> `<header>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<ul>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<li><a href="/about">About</a></li>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<li><a href="/cars">Cars</a></li>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`</ul>`   
+> `</header>`
+
+<br>
+
+2.) Add cars path to **urlpatterns** list in **main_app**:   
+
+`path('cars/', views.cars_index, name='index'),`   
+
+<br>
+
+3.) Define **cars_index** views function in **views.py** in **main_app**:   
+
+> `def cars_index(request):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `return render(request, 'cars/index.html', { 'cars': cars })`
 
