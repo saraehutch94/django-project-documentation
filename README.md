@@ -355,7 +355,8 @@ You should see a success screen pop-up with a spaceship.
 > `{% endfor %}`   
 > `{% endblock %}`
 
-\* `{% endfor %}` --> ending for loop block tag (if it was an if statement, the ending block tag would be: `{% endif %}`)
+\* `{% endfor %}` --> ending for loop block tag (if it was an if statement, the ending block tag would be: `{% endif %}`)   
+\* `{{ }}` --> output of data into template
 
 ****
 
@@ -440,3 +441,185 @@ Response: `<QuerySet[]>`
 4.) Create in-memory model (instance of Car model) and save it to the database:
 
 `c = Car(make="Tesla", model="Model X", color="blue", description="my future car will be named Blueberry")`
+
+`c.__dict__`   
+
+\* This will yield a response like: `{..., 'id': None, 'name': 'Tesla', etc...}`   
+
+\* There is no id yet because it is not yet saved in the database. To save model instance to the database:   
+
+`c.save()`   
+`c.id` --> should yield 1
+
+\* Now, when you check the database for all the car objects, you should get this:
+
+`Car.objects.all()`   
+`<QuerySet[<Car: Carobject(1)>]>`
+
+\* You also save the model instance like this, in one line of code:   
+
+`c = Car(make="Tesla", model="Model X", color="blue", description="my future car will be named Blueberry").save()`
+
+5.) Override the `__str__` method in the Car model in **models.py** so the query sets can print in a more helpful way (write code below within the Car class, below defining it's attributes):   
+
+> `def __str__(self):`  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`return f'{self.make}, {self.model}'`
+
+\* Changes to a Model don't become active in the shell unless you `exit()` the shell, re-launch, and re-import the models   
+\* *Remember:* we made a change to our Model, so we need to **make + apply migrations** (do this before you re-launch your **psql** shell):   
+
+`python manage.py makemigrations`  
+`python manage.py migrate`   
+
+6.) Override/update single attribute value of a model instance: assigning it a new value and calling `save()`
+
+> `from main_app.models import Car`   
+> `c = Car.objects.first()`   
+> `c` --> yields `<Car: Tesla Model X>`   
+> `c.make = "Teslaaa"`   
+> `c.save()`   
+> `c` --> yields `<Car: Teslaaa Model X>`
+
+\* Fourth line of code above --> doesn't just save it the changes to the database - you need to call `save()`.
+
+7.) `Objects.filter()` --> query model's table for data that matches a criteria similar to how we used the Mongoose `find()` method:
+
+`Car.objects.filter(make="Tesla")`   
+`<QuerySet[<Car: Tesla Model X>]>`
+
+\* `objects.filter()` or `objects.exclude()` --> similar to WHERE clause in SQL
+
+7.) Query for all cars whose make contains a sub-string:
+
+`Car.objects.filter(make__contains = "K")`   
+`<QuerySet[<Car: Kia Stinger>, <Car: Kia EV6>]>`
+
+8.) (Example with Cat model): query for cats with age equal or less than 3:
+
+`Cat.objects.filter(age__lte=3)`
+
+\* Basic lookups: `field__lookup_type = value`   
+\* `lte` = "less than or equal to"
+
+9.) `get()` method: common data operation to read one specific model object from the table based on some provided value (usually the id):
+
+`Car.objects.get(id=1)`
+
+\* `get()` can also be called with multiple **field = value** argumentse to query multiple columns
+
+10.) `order_by() method`
+
+`Car.objects.order_by("make")` --> ascending order   
+`Car.objects.order_by("-make")` --> descending order   
+
+\* The QuerySet object can be indexed + sliced:
+
+`Cat.objects.order_by("-age")[0]` --> grabs cat who is the oldest of the model instances
+
+11.) Head to **views.py** and import your **Car model**. Then, query for all Car model instances in your **cars_index** view function:
+
+> `from .models import Car`   
+> (below: inside cars_index view function, above return render(...)):   
+`cars = Car.objects.all()`
+
+****
+
+<br>
+
+### **Django Build-in Admin Features**
+
+\* *superuser:* admin for site   
+\* When you are logged-in, you can access the Admin app to add additional users and manipulate Model data
+
+1.) Quit out of the **psql shell** by running `exit()`   
+2.) Make sure you are now in your **django environment (django_env)**   
+3.) Make sure your server is running by running `python manage.py runserver`   
+4.) Run this command:   
+
+`python manage.py createsuperuser`
+
+\* Follow the prompts   
+\* Head to **localhost:8000/admin** route in your site to see admin portal   
+\* In order to manipulate the Car data in the admin site, we need to "register" the Car model so that the admin portal knows about it. Head to **main_app/admin.py:**   
+
+> `from .models import Car`   
+> `admin.site.register(Car)` * under "Register your models here"
+
+****
+
+<br>
+
+### **Car Show Page**
+
+1.) Capture id of car we want details for in the URL   
+
+\* In Django, we use angle brackets to declare a URL parameter to capture values within the segments of a URL as follows":
+
+`cars/<int:car_id>/`
+
+\* The `int` converter --> match + convert captured value from a single string into an integer (in this case). If info in segment does not look like an integer, then it will not be matched.
+
+2.) Clicking on car in **index.html** should trigger request to server to view details of a car:
+
+> `{% for car in cars %}`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<a href="/cars/{{ cars.id }}">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span>{{ car.make }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span>{{ car.model }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span>Color: {{ car.color }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span>Description: {{ car.description }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `</a>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`</div>`   
+> `{% endfor %}`
+
+3.) Add path/route entry to `urlpatterns` list in `main_app/urls.py` that will match each request being made when clicking each individual car:
+
+> `urlpatterns = [`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `...`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `...`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `...`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `path('cars/<int:car_id>/', views.cars_detail, name="detail"),`   
+> `]`
+
+4.) Define **cars_detail** view function in **views.py**:
+
+> `def cars_detail(request, car_id):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`car = Car.objects.get(id=car_id)`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `return render(request, 'cars/detail.html', {'car': car})`
+
+\* Django will pass any captured URL parameters as a named argument to the view function   
+\* `car_id` was passed from URL parameter in "detail" path/route (in `urlpatterns` in **main_app/urls.py**)
+
+5.) Render data (car data) within **detail.html** template
+
+\* **cars_detail** view function passed a dictioary of data (context dictionary: `{'car': car}`) to **detail.html** template
+
+6.) Create **detail.html** template:
+
+`touch main_app/templates/cars/detail.html`
+
+7.) Add code to template:
+
+> `{% extends 'base.html' %}`   
+> `{% block content %}`   
+>    
+> `<h1>Car Details</h1>`   
+>   
+> `<div class="car">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div class="car-detail">{{ car.make }}</div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div class="car-detail">{{ car.model }}</div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div class="car-detail">{{ car.color }}</div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div class="car-detail">{{ car.description }}</div>`   
+> `</div>`   
+>   
+> `{% endblock %}`
+
+****
+
+<br>
+
+### **Removing hard-coded URLs in templates**
+
+\* During development, URLs could change   
+\* The name argument in our paths/routes in the `urlpatterns` variable (**main_app/urls.py**), is used to obtain the correct URL in templates using DTL's url template tag
+
