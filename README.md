@@ -575,9 +575,7 @@ Response: `<QuerySet[]>`
 3.) Add path/route entry to `urlpatterns` list in `main_app/urls.py` that will match each request being made when clicking each individual car:
 
 > `urlpatterns = [`   
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `...`   
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `...`   
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `...`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `...`    
 > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `path('cars/<int:car_id>/', views.cars_detail, name="detail"),`   
 > `]`
 
@@ -622,4 +620,89 @@ Response: `<QuerySet[]>`
 
 \* During development, URLs could change   
 \* The name argument in our paths/routes in the `urlpatterns` variable (**main_app/urls.py**), is used to obtain the correct URL in templates using DTL's url template tag
+
+1.) In **index.html**, fix code:   
+
+~~`<a href="/cars/{{ car.id }}">`~~   
+`<a href="{% url 'detail' car.id %}">`
+
+\* `url` --> declaring "url template tag"   
+\* `detail` --> name attribute of path   
+\* `car.id` --> data to pass to path as URL parameter   
+
+****
+
+<br>
+
+### **Django Class-Based Views (CBVs)**
+
+\* CBVs can accomplish full CRUD   
+\* classes instead of functions to define views   
+\* defines view functionality   
+\* can be used in lieu of view functions (NOT to fully replace --> can and WILL coexist)   
+\* allows us to abstract away from functions   
+\* CBVs can ask database for model instance, render a template for us, will provide all the data to that template   
+\* if there is a form on the template, it will validate the data from the form, as well as create the actual form   
+\* Example:   
+
+> `from django.views.generic import ListView`   
+>   
+> `class BookList(ListView):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = Book`
+
+\* Need to define Model you want to work with in each CBV   
+\* Whenever we reference a class-based view inside our **urls.py**, we have to invoke a special class method called `as_view()` --> returns all functionality needed to facilitate a view (activates CBV)   
+\* **CBVs save time!**   
+
+1.) Create a new instance of the Car model using Django's built-in **CreateView** in **main_app/urls.py**:
+
+> `urlpatterns = [`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`...`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`path('cars/create/', views.CarCreate.as_view(), name='cars_create'),`   
+> `]`
+
+\* Believe it or not, this one route is used for both **GET** and **POST** requests   
+\* Since Django **does not** practice RESTful routing, this can happen (both provides form for creating car as well as creates new car data instance)    
+
+2.) Head to **base.html** to add link to creating a car in nav bar:   
+
+`<li><a href="{% url 'cars_create' %}">Create Car</a></li>`   
+
+3.) Head to **views.py** to define CBV for creating a car:   
+
+> `from django.views.generic.edit import CreateView`   
+>    
+> `class CarCreate(CreateView):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = Car`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`fields = '__all__'`
+
+\* `Car` --> Model we want to create instance of   
+\* `fields` --> individual columns in database; here we are telling Django which fields we want to provide in the form Django creates for us   
+\* If you didn't want to include all fields in the form, you can write your fields attribute in a tuple, like this:   
+
+`fields = ('make', 'model', 'color', 'description')`
+
+\* If you test the create car link on the nav, you should see an error in browser: **The form template has not been created yet**   
+\* If you noticed in this error, Django is expecting a certain file named **car_form.html** to be within a folder called **main_app** within the **templates** folder   
+\* *Django is a convention over configuration framework*. Meaning, it expects for things to be named a certain way so they can be found by Django correctly
+
+4.) Head to templates directory. Create a folder called **main_app** and a file inside that folder called **car_form.html**   
+
+`mkdir main_app/templates/main_app`   
+`touch main_app/templates/main_app/car_form.html` --> takes model name and adds __form to it
+
+5) Add **car_form.html** template content
+
+> `{% extends 'base.html' %}`   
+> `{% block content %}`   
+> `<h1>Add a new Car</h1>`   
+>    
+> `form action="" method="POST">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{{ form }}`   
+> `</form>`   
+> `{% endblock %}`
+
+\* `form` --> placeholder to print form w/ fields   
+\* Django will try to add form fields to HTML5 form, so we need to add `<form>` tag
+
 
