@@ -653,6 +653,16 @@ Response: `<QuerySet[]>`
 \* Need to define Model you want to work with in each CBV   
 \* Whenever we reference a class-based view inside our **urls.py**, we have to invoke a special class method called `as_view()` --> returns all functionality needed to facilitate a view (activates CBV)   
 \* **CBVs save time!**   
+\* **Important note about CBVs:** You can create an index and detail page using CBVs, by utilizing this code:
+
+> `from django.views.generic.list import ListView`   
+> `from django.views.generic.detail import DetailView`
+>   
+> `class CarList(ListView):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = Car`   
+>   
+> `class CarDetail(DetailView):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = Car`
 
 1.) Create a new instance of the Car model using Django's built-in **CreateView** in **main_app/urls.py**:
 
@@ -697,7 +707,7 @@ Response: `<QuerySet[]>`
 > `{% block content %}`   
 > `<h1>Add a new Car</h1>`   
 >    
-> `form action="" method="POST">`   
+> `<form action="" method="POST">`   
 > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{{ form }}`   
 > `</form>`   
 > `{% endblock %}`
@@ -705,4 +715,65 @@ Response: `<QuerySet[]>`
 \* `form` --> placeholder to print form w/ fields   
 \* Django will try to add form fields to HTML5 form, so we need to add `<form>` tag
 
+6.) Add submit button + **csrf token** to form:
+
+> `<form action="" method="POST">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{% csrf_token %}`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{{ form }}`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<input type="submit" value="Add Car"/>`   
+> `</form>`   
+> `{% endblock %}`
+
+\* *csrf:* "cross-site request forgery"   
+\* Django's forms are super secure, but they also take advantage of an extra layer of security that fights against an exploitation technique called **csrf**   
+\* A hacker will build a website clone and present it to people, have people enter in their information; the hacker will then go into the real site and use those credentials used on their fake site to log into the real site   
+\* Django creates special token inside form that, before it gets submitted, Django has to validate the token's authenticity before allowing it to penetrate the server   
+\* Can see the token if you open Chrome DevTools + click anywhere in the form
+
+\* **Should get an error when submitting new car --> in Exception Value of error, it will state that there is no URL to redirect to (provide a URL or define get_absolute_url on model**
+
+\* Always check **Exception Value** in browser error for accurate reasoning on why error is happening
+
+\* **get_absolute_url** - preferred method; Django allows us to define a special method for every instance of a model that will be called by the instance whenever it is created; this method is a method that each car object can call on itself and can tell it to redirect us to anywhere in the app (show, index, show, etc.)
+
+7.) Head to **models.py** and add **get_absolute_url** method to the Car model:
+
+> `def get_absolute_url(self):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`return reverse('detail', kwargs={'car_id': self.id})`
+
+\* `'detail'` --> where you want to send user after they created a car
+
+\* Code above performs "reverse lookup" --> process of starting w/ model instance + trying to look up url path for that model instance (past: started w/ url path + tried to find model instance that path belongs to); now it's reversed
+
+\* This method gets invoked when creating the object. Once object is created, we will do reverse lookup + find corresponding url path (ex: 'detail' path) that belonds to that model instance by using the **reverse function**, which uses **kwargs** to insert self.id (model instance's id) into path query param (ex: car_id)
+
+\* Even with this method being built into Django, it is not defined until we define it
+
+\* **Fat Models, Skinny Controllers** --> we want to have as much functionality as possible in models, while keeping out controller code short + sweet
+
+\* *non-preferred method:*
+
+`success_url = '/cars/'` --> after car is created, I want to be redirected back to all cars (index page)
+
+\* This method can't be avoided when it comes to deleting a model instance (can't be brought to detail page after deleting if there is no more car to display in detail page - will see later on in docs)
+
+****
+
+<br>
+
+### **Update + Delete**
+
+1.) Define update + delete routes in **main_app/urls.py**
+
+> `urlpatterns = [`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`...`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`path('cars/<int:pk>/update/', views.CarUpdate.as_view(), name='cars_update'),`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`path('cars/<int:pk>/delete/', views.CarDelete.as_view(), name='cars_delete'),`   
+> `]`
+
+\* CBVs don't use _id convention in their path/URL parameters; they use **pk/primary key**, which is the same as id
+
+\* In the database, pk doesn't exist (just a naming convention) --> in the database, it's id
+
+\* pk becomes variable that CBV will be looking for so when database lookup occurs, it will use pk to find the object
 
