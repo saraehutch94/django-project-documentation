@@ -364,3 +364,79 @@ You should see a success screen pop-up with a spaceship.
 \* *model:* extension of Django's built-in **Model class**   
 \* Attributes in **Model class** are created with **Field classes**; each attribute will become a *column in the table* for that specific model's table.
 
+1.) Create model:
+
+1.) Remove "fake" database from **views.py**   
+2.) Head to **models.py** to initialize first model and define it's attributes:   
+
+> `class Car(models.Model):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`make = models.CharField(max_length=100)`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = models.CharField(max_length=100)`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`color = models.CharField(max_length=30)`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`description = models.TextField(max_length=250)`   
+
+\* *models*: used to perform CRUD data operations on a database   
+\* a Django model represents a single entity from the ERD   
+\* **model objects:** represent rows in database table; also called instances of the Model, just like how we worked with Mongoose documents   
+\* each attribute defined above wil be a column in the Car table   
+\* the **Field class** in each attribute defines the column's data type in the table
+
+2.) **Migration files**
+
+`python manage.py makemigrations`
+
+\* Above command: creates migration files for all models that have been added or changed since last migration   
+\* Output from `makemigrations`:   
+`main_app/migrations/0001_initial.py`   
+\* This does NOT create a table in the database/update database schema   
+\* Migrations directory is created for an app the first time you run `makemigrations`   
+\* To create table in database, and to synchronize database with code in migration files, run this command next:   
+
+`python manage.py migrate`   
+
+To check that Car database was created, open psql shell:
+
+`psql`   
+`\l`   
+`\c car_collector`   
+`\d`
+
+\* You should see `main_app_car` in database table
+
+****
+
+<br>
+
+### **ORM: Object-Relational Mapper**
+
+\* Creates Python objects from rows in a relational database table, and vice-versa   
+\* allows developers to write object-oriented  code to CRUD data instead of using SQL directly   
+\* Django's ORM automatically generates methods for each model:   
+- filtering
+- ordering
+- can access data from related models
+
+1.) Use Python shell to load django environment (performing CRUD):   
+
+`python manage.py shell`
+
+2.) Import model to work with, just like in the application:   
+
+`from main_app.models import Car`
+
+3.) Retrieve all cars (car objects)
+
+`Car.objects.all()`
+
+Response: `<QuerySet[]>`
+
+\* To view all methods you can use on model objects:   
+`Car.objects.` + `TAB` key twice   
+\* Anytime you want to perform query operations on a Model to retrieve model objects (rows) from a database table, it is done via a **manager object**   
+\* Django adds manager to every model class --> this is the **object's attribute attached to car above**   
+\* `<QuerySet[]>` --> database query --> can be refined by adding additional methods to it   
+\* When app needs data to iterate over cars, the query will be sent to the database and the result is a list-like object that represents a collection of model instances (rows) from the database
+
+4.) Create in-memory model (instance of Car model) and save it to the database:
+
+`c = Car(make="Tesla", model="Model X", color="blue", description="my future car will be named Blueberry")`
