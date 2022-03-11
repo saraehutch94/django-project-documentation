@@ -777,3 +777,49 @@ Response: `<QuerySet[]>`
 
 \* pk becomes variable that CBV will be looking for so when database lookup occurs, it will use pk to find the object
 
+2.) Head to **detail.html** template for cars to add links for editing and deleting (under second div with all content):
+
+> `<div class="card-action">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<a href="{% url 'cars_update' car.id %}">Edit</a>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<a href="{% url 'cars_delete' car.id %}">Delete</a>`   
+> `</div>`
+
+\* `class="card-action"` --> from Materialize CSS framework (check out their docs)
+
+3.) Head to **views.py**; next to `from django.views.generic.edit import CreateView`, add:
+
+`, UpdateView, DeleteView`
+
+4.) Define **UpdateView** class (still within **views.py**):
+
+> `class CarUpdate(UpdateView):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = Car`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`fields = '__all__'`
+
+And **DeleteView** class:
+
+> `class CarDelete(DeleteView):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = Car`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`success_url = '/cars/'`   
+
+\* Mentioned earlier in the docs, we talked about how the **DeleteView** would not be able to utilize the method `get_absolute_url`. This is because once a model instance is deleted, it cannot be sent back to it's detail page. Therefore, we need to use the `success_url` attribute in it's class, so we can send the user back to the index page once the model instance is deleted.
+
+\* When you press the edit button we added to each car model instance, it will bring you to the "Add a Car" form. You can edit the car using this form, but the important part here is that Django takes the same form created earlier for creating a car and uses it for editing a car as well. We want to add some template logic so we can differentiate between the two forms.
+
+5.) Head to the **car_form.html** template, so we can add the logic:
+
+> `{% if object %}`   
+> `<h1>Edit {{ object.name }}</h1>`   
+> `{% else %}`   
+> `<h1>Add a Car</h1>`   
+> `{% endif %}`   
+>   
+> `...`
+>   
+> `<input class="btn blue" type="submit" value="{% if object %} Edit {% else %} Add {% endif %}"/>`   
+>    
+> `{% if object %}`   
+> `<a href="{% url 'detail' object.id %}">Cancel</a>`   
+> `{% else %}`   
+> `<a href="{% url 'index' %}">Cancel</a>`   
+> `{% endif %}`   
