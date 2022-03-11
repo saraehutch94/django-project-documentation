@@ -977,3 +977,40 @@ Add content to template:
 
 ### **One-To-Many Relationships with Django Models**
 
+1.) Add another model in **models.py** that will include a **foreign key**, referencing each car model instance:
+
+> `class Gas(models.Model):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`date = models.DateField()`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`fill = models.CharField(max_length=1)`   
+
+\* The reason behind the `max_length=1` in the **fill** attribute above, is because we want to take up as little space as possible; this is very common (especially in SQL) to represent data with one or two characters (ex: a **Boolean** field: **t = True**, **f = False**; OR **0 = True**, **1 = False**)   
+
+2.) Define **FIELD** choices (still within **models.py**):
+
+> `FILLS = (`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`('1', 'Week 1'),`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`('2', 'Week 2'),`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`('3', 'Week 3'),`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`('4', 'Week 4'),`   
+> `)`
+
+\* The numerical values above represent the values that will be stored in the database   
+\* The 'Week' values are the human-readible representations of the data   
+\* Defining an **uppercase variable:** defining a constant; this is a great use case for a tuple --> in Python, we store information that won't change and won't take up a lot of space inside tuples
+
+3.) Let model know that we have the **FIELD** choices tuple   
+\* Options the user will be able to choose from whenever they are creating a fill for a car
+
+(in **Gas model**):
+
+`fill = models.CharField(max_length=1, choices=FILLS, default=FILLS[0][0]`
+
+\* Defining the `choices` keyword argument on the `fill` attribute unlocks more functionality that comes with Django models (ex: `self.get_fill_display()`)   
+\* `default = FILLS[0][0]` --> this is pointing to the '1' value in the first tuple of the `FILLS` tuple --> sets default choice
+
+4.) Make sure the representation of model instances are human-friendly (still within **Gas Model**):
+
+> `def __str__(self):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`return f'{self.get_fill_display()} on {self.date}'`
+
+\* `get_fill_display()` --> this special method automatically gets created whenever we have an **attribute with a choices keyword argument**
