@@ -823,3 +823,157 @@ And **DeleteView** class:
 > `{% else %}`   
 > `<a href="{% url 'index' %}">Cancel</a>`   
 > `{% endif %}`   
+
+\* `object` --> default variable name: Django view engine uses this variable to reference the object that we are editing on the page (if it exists --> editing object / if it does not exist --> adding a car/no object created yet)
+
+\* If you try to delete, you will get an error in the browser (Exception Value): **Django is looking for a deletion confirmation template** --> **"main_app/template/car_confirm_delete.html** 
+
+6.) Add **car_confirm_delete.html** template to **template** folder:
+
+`touch main_app/templates/car_confirm_delete.html`
+
+Add content to template:
+
+> `{% extends 'base.html' %}`   
+> `{% block content %}`   
+>   
+>  `<h3>Are you sure you want to remove {{ object.make }} {{ object.model }}?</h3>`   
+>   
+> `<form action="" method="POST">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{% csrf_token %}`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{{ form.as_p }}`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<input type="submit" value="Yes - Remove"/>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<a href="{% url 'detail' object.id %}">Cancel</a>`   
+> `</form>`   
+>   
+> `{% endblock %}`   
+
+\* `action` attribute in `<form>` tag --> where to send form data when form is submitted   
+\* No `action` attribute --> browser automatically adopts same url in address bar (same URL, but POST request)   
+\* You should now be able to delete a model instance from the database
+
+****
+
+<br>
+
+### **Adding another model to the database**
+
+\* These will be the same steps as the Car Model, except you create a new model, make + apply migrations, and start adding CRUD to the Model.   
+\* For this Model, we will apply the `ListView` and `DetailView` CBVs
+
+1.) Create model in **main_app/models.py**
+
+> `class Tree(models.Model):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`scent = models.CharField(max_length=100)`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`color = models.CharField(max_length=100`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`description = models.CharField(max_length=250)`   
+>   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`def __str__(self):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`return self.scent`
+
+2.) Make + apply migrations
+
+`python manage.py makemigrations`   
+
+\* You should see **Create model Tree**
+
+`python manage.py migrate`
+
+\* You should see new Tree table in database if you run these commands now:
+
+`\l`   
+`\c car_collector`   
+`\d`
+
+3.) Add Tree model instances to database:
+
+`python manage.py shell`  
+`from main_app.models import Tree`   
+`Tree(scent="Black Ice", color="black", description="The original Little Tree car scent").save()`
+
+\* Do this a few more times to add more Tree model instances. Check to make sure they were added by typing `Tree.objects.all()` into terminal
+
+4.) Quit shell using `quit()`; now time to add index route:
+
+**in main_app/urls.py - urlpatterns**
+
+`path('trees/', views.TreeList.as_view(), name='tree_index',`
+
+5.) Add link to Tree index in **base.html** nav bar:
+
+`<li><a href="{% url 'tree_index' %}">View All Little Trees</a></li>`
+
+6.) Import **ListView** and **DetailView** to **views.py**
+
+`from django.views.generic.list import ListView`   
+`from django.views.generic.detail import DetailView`   
+
+7.) Create **CBV** for **ListView**:
+
+> `class TreeList(ListView):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = Tree`
+
+8.) Create appropriate template in **main_app** folder and add content:
+
+`touch main_app/templates/main_app/tree_list.html`
+   
+> `{% extends 'base.html' %}`   
+> `{% block content %}`
+>   
+> `<h2>All Little Trees</h2>`   
+>   
+> `{% for tree in object_list %}`   
+> `<div class="card">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<a href="{% url 'trees_detail' tree.id %}">`
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div class="card-content">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span class="card-title">{{ tree.scent }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`</div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`</a>`   
+> `</div>`   
+>   
+> `{% endfor %}`   
+> `{% endblock %}`
+
+9.) Add path for **detail** page in **main_app/urls.py - urlpatterns**:
+
+`path('/cars/<int:pk>/', views.TreeDetail.as_view(), name='tree_detail'),`   
+
+10.) Add CBV for **detail** route/path:
+
+> `class TreeDetail(DetailView):`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`model = Tree`   
+
+11.) Add template for **tree_detail** path + add content:
+
+`touch main_app/templates/main_app/tree_detail.html`
+
+
+> `{% extends 'base.html' %}`   
+> `{% block content %}`   
+>   
+> `<h2>{{ object.scent }} Details</h2>`   
+>   
+> `<div class="card">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div class="card-content"></div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<span class="card-title">{{ object.scent }}</span>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<p class="tree-detail">Color: {{ object.color }}</p>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<p class="tree-detail">Description: {{ object.description }}</p>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<div class="card-action">`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<a href="{% url 'trees_update' object.id %}" class="card-action-link">Edit</a>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<a href="{% url 'trees_delete' object.id %}" class="card-action-link">Delete</a>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`</div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`</div>`   
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`</div>`   
+>   
+> `{% endblock %}`
+
+\* **Rest of CRUD:** review how we implemented CBVs for the Car Model (create, update and delete operations)
+
+***
+
+<br>
+
+### **One-To-Many Relationships with Django Models**
+
